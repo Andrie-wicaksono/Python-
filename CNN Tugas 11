@@ -1,0 +1,514 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled1.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Andrie-wicaksono/Python-/blob/main/CNN%20Tugas%2011\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "AEvOoXXQUCUz",
+        "outputId": "cf0bbe81-1ba3-412f-8615-345d173dc71a"
+      },
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Mounted at /content/drive\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "liMSu1_fWB_0",
+        "outputId": "7e7c2442-78e9-4249-adc2-14c9eaa11f5e"
+      },
+      "source": [
+        "cd /content/drive/My Drive/Colab Notebooks"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "/content/drive/My Drive/Colab Notebooks\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "tMUxQmSMUXJF",
+        "outputId": "d8536f72-0200-4c89-b292-5caf81dd707c"
+      },
+      "source": [
+        "ls"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "\u001b[0m\u001b[01;34mdataset\u001b[0m/\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "l5MTAOXIUa7I"
+      },
+      "source": [
+        "from keras.models import Sequential\n",
+        "from keras.layers.core import Activation\n",
+        "from keras.layers.core import Flatten\n",
+        "from keras.layers.core import Dense\n",
+        "from keras.optimizers import Adam\n",
+        "from sklearn.preprocessing import LabelBinarizer\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.metrics import classification_report\n",
+        "from PIL import Image\n",
+        "from imutils import paths\n",
+        "import numpy as np\n",
+        "import os"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "OemlQ3mqUe-B",
+        "outputId": "0f9ba889-4bf8-4ed6-ae05-be476a69d052"
+      },
+      "source": [
+        "# grab all image paths in the input dataset directory, then initialize\n",
+        "# our list of images and corresponding class labels\n",
+        "print(\"[INFO] loading images...\")\n",
+        "imagePaths = paths.list_images(\"dataset\")\n",
+        "data = []\n",
+        "labels = []"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "[INFO] loading images...\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "qCyjzr5AUi61"
+      },
+      "source": [
+        "# loop over our input images\n",
+        "for imagePath in imagePaths:\n",
+        "\t# load the input image from disk, resize it to 64x64 pixels, scale\n",
+        "\t# the pixel intensities to the range [0, 1], and then update our\n",
+        "\t# images list\n",
+        "\timage = Image.open(imagePath)\n",
+        "  #preprocessing\n",
+        "\timage = np.array(image.resize((64, 64))) / 255.0 #normalisasi\n",
+        "\tdata.append(image)\n",
+        "\n",
+        "\t# extract the class label from the file path and update the\n",
+        "\t# labels list\n",
+        "\tlabel = imagePath.split(os.path.sep)[-2]\n",
+        "\tlabels.append(label)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "yE6wjJ_NUoKV",
+        "outputId": "4ec5eade-a88d-4139-aec6-8615ccbbde23"
+      },
+      "source": [
+        "print(labels)"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "['GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_03', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_01', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_05', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_02', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04', 'GMB_04']\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "SI0DnemiUtFW"
+      },
+      "source": [
+        "# encode the labels, converting them from strings to integers\n",
+        "lb = LabelBinarizer()\n",
+        "labels = lb.fit_transform(labels)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "RbjPdALmVWFV",
+        "outputId": "39bd2daa-11f2-4014-ed0d-4a2b8bae786f"
+      },
+      "source": [
+        "print(labels)"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "[[0 0 1 0 0]\n",
+            " [0 0 1 0 0]\n",
+            " [0 0 1 0 0]\n",
+            " ...\n",
+            " [0 0 0 1 0]\n",
+            " [0 0 0 1 0]\n",
+            " [0 0 0 1 0]]\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Nj7pcNOZW-1A",
+        "outputId": "1cabf483-f867-4838-b924-795432b7c4fd"
+      },
+      "source": [
+        "# perform a training and testing split, using 75% of the data for\n",
+        "# training and 25% for evaluation\n",
+        "(trainX, testX, trainY, testY) = train_test_split(np.array(data),\tnp.array(labels), test_size=0.25, shuffle=True)\n",
+        "print(trainX.shape)\n",
+        "print(testX.shape)"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "(438, 64, 64, 3)\n",
+            "(146, 64, 64, 3)\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ZO9cjVvBXIgn",
+        "outputId": "14127b9a-440c-4fa1-8702-e359e4717e07"
+      },
+      "source": [
+        "from keras.layers import Convolution2D, MaxPooling2D\n",
+        "from keras.models import Sequential\n",
+        "from keras.layers.core import Flatten, Dense\n",
+        "\n",
+        "model1 = Sequential()\n",
+        "model1.add(Convolution2D(8, (3,3), activation='relu', input_shape=(64,64,3)))\n",
+        "model1.add(MaxPooling2D(2,2))\n",
+        "model1.add(Convolution2D(16, (3,3), activation='relu'))\n",
+        "model1.add(MaxPooling2D(2,2))\n",
+        "#fully connected layer\n",
+        "model1.add(Flatten())\n",
+        "model1.add(Dense(100, activation='relu'))\n",
+        "model1.add(Dense(3, activation='softmax'))\n",
+        "\n",
+        "model1.summary()"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Model: \"sequential_4\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "conv2d_5 (Conv2D)            (None, 62, 62, 8)         224       \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_4 (MaxPooling2 (None, 31, 31, 8)         0         \n",
+            "_________________________________________________________________\n",
+            "conv2d_6 (Conv2D)            (None, 29, 29, 16)        1168      \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_5 (MaxPooling2 (None, 14, 14, 16)        0         \n",
+            "_________________________________________________________________\n",
+            "flatten_3 (Flatten)          (None, 3136)              0         \n",
+            "_________________________________________________________________\n",
+            "dense_4 (Dense)              (None, 100)               313700    \n",
+            "_________________________________________________________________\n",
+            "dense_5 (Dense)              (None, 3)                 303       \n",
+            "=================================================================\n",
+            "Total params: 315,395\n",
+            "Trainable params: 315,395\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "WWIyIbvXXTZV"
+      },
+      "source": [
+        "from keras.models import Sequential\n",
+        "from keras.layers.core import Flatten\n",
+        "from keras.layers.core import Dense\n",
+        "\n",
+        "model = Sequential(\n",
+        "    [\n",
+        "        Flatten(input_shape=(64*64*3,)),\n",
+        "        Dense(100, activation=\"relu\", name=\"layer1\"),\n",
+        "        Dense(16, activation=\"relu\", name=\"layer2\"),\n",
+        "        Dense(16, activation=\"relu\", name=\"layer3\"),\n",
+        "        Dense(3, activation = \"softmax\", name=\"layer4\"),\n",
+        "    ]\n",
+        ")"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "9epTfh-laUmH",
+        "outputId": "49c3630d-3bb8-4a56-a0c3-695ffe5df4ee"
+      },
+      "source": [
+        "model.summary()"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Model: \"sequential_1\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "flatten_1 (Flatten)          (None, 12288)             0         \n",
+            "_________________________________________________________________\n",
+            "layer1 (Dense)               (None, 100)               1228900   \n",
+            "_________________________________________________________________\n",
+            "layer2 (Dense)               (None, 16)                1616      \n",
+            "_________________________________________________________________\n",
+            "layer3 (Dense)               (None, 16)                272       \n",
+            "_________________________________________________________________\n",
+            "layer4 (Dense)               (None, 3)                 51        \n",
+            "=================================================================\n",
+            "Total params: 1,230,839\n",
+            "Trainable params: 1,230,839\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-J3EZCQQafaM",
+        "outputId": "f5d8814c-fcc9-4bd4-e1f1-627d23fab5a4"
+      },
+      "source": [
+        "print(\"[INFO] training network...\")\n",
+        "opt = Adam(lr=1e-3, decay=1e-3 / 50)\n",
+        "model.compile(loss=\"categorical_crossentropy\", optimizer=opt,\n",
+        "              metrics=[\"accuracy\"])"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "[INFO] training network...\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "kU7iX5IHdKnN"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "pkq8qfpsgJSs"
+      },
+      "source": [
+        "# evaluate the network\n",
+        "print(\"[INFO] evaluating network...\")\n",
+        "predictions = model1.predict(testX, batch_size=32)\n",
+        "print(classification_report(testY.argmax(axis=1),\n",
+        "\tpredictions.argmax(axis=1), target_names=lb.classes_))"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "eWIBbGVrgMk4"
+      },
+      "source": [
+        "model.save('nnmodel_scene')"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "KzFDCfpwgNJ_"
+      },
+      "source": [
+        "import cv2\n",
+        "import matplotlib.pyplot as plt\n",
+        "image1='forest_test.jpg'"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "53rvmxXWgRBS"
+      },
+      "source": [
+        "img_array = cv2.imread(image1)\n",
+        "plt.imshow(img_array)\n",
+        "plt.show()\n",
+        "# print(type(img_array))"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "sFhR7F--gUjo"
+      },
+      "source": [
+        "image_testing = Image.open('forest_test.jpg')\n",
+        "image_testing = np.array(image_testing.resize((64, 64))) / 255.0\n",
+        "image_testing.shape"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "K0pCYgd7gXyg"
+      },
+      "source": [
+        "image_testing = np.expand_dims(image_testing, axis=0)\n",
+        "print(image_testing.shape)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "H7_ZBCP9gaF8"
+      },
+      "source": [
+        "output = model.predict(image_testing, 1)\n",
+        "print(output)\n",
+        "print(lb.classes_[output.argmax(axis=1)])"
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
